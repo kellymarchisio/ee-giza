@@ -59,8 +59,10 @@ public:
 public:
   model2(model1& m1,amodel<PROB>&,amodel<COUNT>&);
   void initialize_table_uniformly(sentenceHandler&);
-  int em_with_tricks(int iterations,bool dumpCount = false,
-                     const char* dumpCountName = NULL, bool useString = false);
+  int em_with_tricks(int iterations, bool interpolateProbsFromFile = false,
+		  int freqBasedInterpolation = 0, float multiplier = 1.0,
+		  bool dumpCount = false, const char* dumpCountName = NULL,
+		  bool useString = false);
   void load_table(const char* aname);
   inline amodel<PROB>& getATable(void) {
     return aTable;

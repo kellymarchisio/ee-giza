@@ -96,6 +96,7 @@ class model1 : public report_info
 {
 public:
   string efFilename;
+  string inputProbsFilename;
   vcbList&  Elist ;
   vcbList&  Flist ;
   double eTotalWCount ; // size of source copus in number of words
@@ -103,6 +104,7 @@ public:
   int noEnglishWords;
   int noFrenchWords;
   tmodel<COUNT, PROB>&tTable;
+  //tmodel<COUNT, PROB>&inputTTable;
   Vector<WordEntry>& evlist ;
   Vector<WordEntry>& fvlist ;
   int threadID;
@@ -115,14 +117,17 @@ public:
           Perplexity* _testPerp,
           sentenceHandler* _testHandler,
           Perplexity& _trainViterbiPerp,
-          Perplexity* _testViterbiPerp);
+          Perplexity* _testViterbiPerp,
+	  const char* inprobsname);
 
   model1 (const model1& m1, int _threadID=0);
   void initialize_table_uniformly(sentenceHandler& sHandler1);
 
   int em_with_tricks(int noIterations,
-                     bool seedModel1, Dictionary& dictionary, bool useDict, bool dumpCount = false,
-                     const char* dumpCountName = NULL, bool useString = false);
+                     bool seedModel1, Dictionary& dictionary, bool useDict,
+		     bool interpolateProbsFromFile = false, int freqBasedInterpolation = 0,
+		     float multiplier = 1.0, bool dumpCount = false, const char* dumpCountName = NULL,
+		     bool useString = false);
   int em_thread(int noIterations, int thread,Dictionary& dictionary, bool useDict);
   bool load_table(const char* tname);
   void readVocabFile(const char* fname, Vector<WordEntry>& vlist, int& vsize,
@@ -150,6 +155,9 @@ public:
   };
   inline string& getEFFilename(void) {
     return efFilename;
+  };
+  inline string& getInputProbsFilename(void) {
+    return inputProbsFilename;
   };
 
 ////////////////////////////////////////////////////////////////

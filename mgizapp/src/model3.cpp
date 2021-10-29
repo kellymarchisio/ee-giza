@@ -89,7 +89,7 @@ model3::~model3()
   }
 }
 
-void model3::em(int noIterations, sentenceHandler& sHandler1)
+void model3::em(int noIterations, sentenceHandler& sHandler1, bool interpolateProbsFromFile)
 {
 
   LogProb all_prob, aprob, temp;
@@ -177,6 +177,10 @@ void model3::em(int noIterations, sentenceHandler& sHandler1)
     aCountTable.normalize(aTable);
     dCountTable.normalize(dTable);
     nCountTable.normalize(nTable, &Elist.getVocabList());
+    if (interpolateProbsFromFile) {
+	tTable.interpolateProbsFromFile(inputProbsFilename.c_str());
+	tTable.normalizeTableProbs(Elist, Flist);
+    }
 
     // normalize p1 & p0
 

@@ -210,9 +210,33 @@ public:
   }
 public:
   void insert(WordIndex e, WordIndex f, COUNT cval=0.0, PROB pval = 0.0) {
+    cerr << "Inserting" << e <<":" << f << "\n";
     CPPair* found = find(e,f);
-    if(found)
-      *found=CPPair(cval,pval);
+    if(found) {
+	cerr << "Pair Found\n";
+	*found=CPPair(cval,pval);
+    }
+    else
+	cerr << "Pair NOT Found\n";
+  }
+
+  void interpolateProb(WordIndex e, WordIndex f, PROB prob_to_add=0.0,
+		  double src_freq=1.0, float multiplier=1.0) {
+    if( prob_to_add ) {
+      CPPair *p=find(e,f);
+      if( p ) {
+        mutex[e]->lock();
+	// cerr << "Pair Found: " << e << " " << f << ". Interpolating with: " << prob_to_add;
+	// cerr << ". Src Freq:" << src_freq;
+	// cerr << ". Multiplier:" << multiplier << "\n";
+	prob_to_add = multiplier * (prob_to_add / src_freq);
+	float new_prob = (p->prob + prob_to_add);
+	// cerr << "Orig Prob: " << p->prob<< ". ";
+        p->prob = new_prob;
+	// cerr << "New Prob: " << p->prob<< "\n";
+        mutex[e]->unlock();
+      }
+    }
   }
 
   CPPair*getPtr(int e,int f) {
@@ -346,7 +370,9 @@ public:
                              const double fTotal,
                              const bool actual = false ) const;
   void normalizeTable(const vcbList&engl, const vcbList&french, int iter=2);
+  void normalizeTableProbs(const vcbList&engl, const vcbList&french, int iter=2);
   bool readProbTable(const char *filename);
+  bool interpolateProbsFromFile(const char *filename, int freqBasedInterpolation=0, float multiplier=1.0);
   bool readSubSampledProbTable(const char* filename, std::set<WordIndex> &e, std::set<WordIndex> &f);
 };
 

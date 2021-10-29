@@ -121,6 +121,27 @@ void tmodel<COUNT, PROB>::printProbTableInverse(const char *,
     const bool ) const
 {
 }
+
+template <class COUNT, class PROB>
+void tmodel<COUNT, PROB>::normalizeTableProbs(const vcbList&, const vcbList&, int)
+{
+  cerr << "Normalizing Table Probs.";
+  for(unsigned int i=0; i<lexmat.size(); ++i) {
+    double c=0.0;
+    if( lexmat[i] ) {
+      unsigned int lSize=lexmat[i]->size();
+      for(unsigned int j=0; j<lSize; ++j)
+        c+=(*lexmat[i])[j].second.prob;
+      for(unsigned int j=0; j<lSize; ++j)  {
+        if( c==0 )
+          (*lexmat[i])[j].second.prob=1.0/(lSize);
+        else
+          (*lexmat[i])[j].second.prob=(*lexmat[i])[j].second.prob/c;
+      }
+    }
+  }
+  cerr << "Done Normalizing Table Probs.";
+}
 template <class COUNT, class PROB>
 void tmodel<COUNT, PROB>::normalizeTable(const vcbList&, const vcbList&, int)
 {
@@ -166,6 +187,44 @@ bool tmodel<COUNT, PROB>::readProbTable(const char *filename)
   return true;
 }
 
+template <class COUNT, class PROB>
+bool tmodel<COUNT, PROB>::interpolateProbsFromFile(const char *filename,
+		const int freqBasedInterpolation, const float multiplier)
+{
+  /* This function reads a probability table from a file and interpolates
+   probabilities with the current ttable. Each line is of the format:
+   source_word_id target_word_id p(target_word|source_word)
+   */
+  ifstream inf(filename);
+  cerr << "Reading input prob. table from " << filename << "\n";
+  if (!inf) {
+    cerr << "\nERROR: Cannot open " << filename << "\n";
+    return false;
+  }
+  WordIndex src_id, trg_id;
+  PROB prob;
+  int nEntry=0;
+  double src_freq, trg_freq=0.0;
+  while (inf >> src_id >> trg_id >> src_freq >> trg_freq >> prob) {
+    // cerr << "Source Id: " << src_id << ", Trg Id: " << trg_id;
+    // cerr << ", prob to add: " << prob << "\n";
+    // cerr << "Current probability of " << src_id << "->" << trg_id << ": " <<
+    //         getProb(src_id, trg_id) << "\n";
+    if (freqBasedInterpolation == 1)
+	    interpolateProb(src_id, trg_id, prob, src_freq, multiplier);
+    else if (freqBasedInterpolation == 2) {
+	    float freq = std::max(0.5, log(src_freq)); // To avoid a division-by-zero issue later.
+	    interpolateProb(src_id, trg_id, prob, freq, multiplier);
+    }
+    else
+	    interpolateProb(src_id, trg_id, prob, multiplier);
+    // cerr << "New probability of: " << src_id << "->" << trg_id << ": " <<
+    //         getProb(src_id, trg_id) << "\n\n";
+    nEntry++;
+  }
+  cerr << "Interpolated with " << nEntry << " input probabilities. \n";
+  return true;
+}
 
 
 template class tmodel<COUNT,PROB> ;

@@ -108,7 +108,8 @@ void hmm::em_thread(int it,string alignfile,bool dump_files,bool resume)
 }
 extern short NCPUS;
 int hmm::em_with_tricks(int noIterations,bool dumpCount,
-                        const char* dumpCountName, bool useString ,bool resume)
+                        const char* dumpCountName, bool useString ,bool resume,
+			bool interpolateProbsFromFile, int freqBasedInterpolation, float multiplier)
 {
   double minErrors=1.0;
   int minIter=0;
@@ -197,6 +198,12 @@ int hmm::em_with_tricks(int noIterations,bool dumpCount,
     }
     tTable.normalizeTable(Elist, Flist);
     aCountTable.normalize(aTable);
+    if (interpolateProbsFromFile) {
+	cerr << "Interpolating with probabilities from file - HMM Model\n";
+	tTable.interpolateProbsFromFile(inputProbsFilename.c_str(), freqBasedInterpolation,
+			multiplier);
+	tTable.normalizeTableProbs(Elist, Flist);
+    }
     probs=counts;
     cout << modelName << ": ("<<it<<") TRAIN CROSS-ENTROPY " << perp.cross_entropy()
          << " PERPLEXITY " << perp.perplexity() << '\n';

@@ -92,7 +92,7 @@ public:
                       bool updateT=1);
   void load_tables(const char *nfile, const char *dfile, const char *p0file);
 
-  void em(int, sentenceHandler&);
+  void em(int, sentenceHandler&, bool interpolateProbsFromFile = false);
   int viterbi(int, int, int, int,const char* prev_d4 = NULL,const char* prev_d4_2=NULL,bool dumpCount = false,
               const char* dumpCountName = NULL, bool useString = false);
   int viterbi_hto3();

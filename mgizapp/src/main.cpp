@@ -79,6 +79,13 @@ Here are parameters to support Load models and dump models
 GLOBAL_PARAMETER(int,restart,"restart","Restart training from a level,0: Normal restart, from model 1, 1: Model 1, 2: Model 2 Init (Using Model 1 model input and train model 2), 3: Model 2, (using model 2 input and train model 2), 4 : HMM Init (Using Model 1 model and train HMM), 5: HMM (Using Model 2 model and train HMM) 6 : HMM (Using HMM Model and train HMM), 7: Model 3 Init (Use HMM model and train model 3) 8: Model 3 Init (Use Model 2 model and train model 3) 9: Model 3, 10: Model 4 Init (Use Model 3 model and train Model 4) 11: Model 4 and on, ",PARLEV_INPUT,0);
 GLOBAL_PARAMETER(bool,dumpCount,"dumpcount","Whether we are going to dump count (in addition to) final output?",PARLEV_OUTPUT,false);
 GLOBAL_PARAMETER(bool,dumpCountUsingWordString,"dumpcountusingwordstring","In count table, should actual word appears or just the id? default is id",PARLEV_OUTPUT,false);
+GLOBAL_PARAMETER(bool,interpolateProbsFromFileM1,"interpolateprobsfromfilem1","interpolate probabilities with input file in m1",PARLEV_INPUT,false);
+GLOBAL_PARAMETER(bool,interpolateProbsFromFileM2,"interpolateprobsfromfilem2","interpolate probabilities with input file in m2",PARLEV_INPUT,false);
+GLOBAL_PARAMETER(bool,interpolateProbsFromFileHmm,"interpolateprobsfromfilehmm","interpolate probabilities with input file in hmm model",PARLEV_INPUT,false);
+GLOBAL_PARAMETER(bool,interpolateProbsFromFileM3,"interpolateprobsfromfilem3","interpolate probabilities with input file in m3",PARLEV_INPUT,false);
+GLOBAL_PARAMETER(bool,interpolateProbsFromFileM4,"interpolateprobsfromfilem4","interpolate probabilities with input file in m4",PARLEV_INPUT,false);
+GLOBAL_PARAMETER(int,freqBasedInterpolation,"freqbasedinterpolation","interpolate probabilities based on frequency. 0: off, 1: on, 2: on-log.",PARLEV_INPUT,0);
+GLOBAL_PARAMETER(float,multiplier,"multiplier","multiplier for freqency-based interpolation",PARLEV_INPUT,1.0);
 /// END
 short OutputInAachenFormat=0;
 bool Transfer=TRANSFER;
@@ -99,8 +106,9 @@ bool useDict = false;
 string CoocurrenceFile;
 string Prefix, LogFilename, OPath, Usage, SourceVocabFilename,
        SourceVocabClassesFilename(""), TargetVocabClassesFilename(""),
-       TargetVocabFilename, CorpusFilename, TestCorpusFilename, t_Filename,
-       a_Filename, p0_Filename, d_Filename, n_Filename, dictionary_Filename;
+       TargetVocabFilename, InputProbsFilename, CorpusFilename,
+       TestCorpusFilename, t_Filename, a_Filename, p0_Filename, d_Filename,
+       n_Filename, dictionary_Filename;
 
 
 // QIN: Variables required for reloading model and continue training
@@ -525,6 +533,8 @@ double StartTraining(int&result)
   // training
   if (TestCorpusFilename == "NONE")
     TestCorpusFilename = "";
+  if (InputProbsFilename == "NONE")
+    InputProbsFilename = "";
   /////////////////////////// MODULE_TEST_START //////////////////
   if (TestCorpusFilename != "") {
     cout << "Test corpus will be read from: " << TestCorpusFilename << '\n';
@@ -584,7 +594,6 @@ double StartTraining(int&result)
   //ifstream coocs(CoocurrenceFile.c_str());
   tmodel<COUNT, PROB> tTable(CoocurrenceFile);
   cerr << "cooc file loading completed" << endl;
-
 
   // Need to rule out some bad logic
 
@@ -656,8 +665,8 @@ double StartTraining(int&result)
   cerr << "TTable initialization OK" << endl;
   // TModel is important!
   model1 m1(CorpusFilename.c_str(), eTrainVcbList, fTrainVcbList, tTable,
-            trainPerp, *corpus, &testPerp, testCorpus, trainViterbiPerp,
-            &testViterbiPerp);
+            trainPerp, *corpus, &testPerp, testCorpus,
+	    trainViterbiPerp, &testViterbiPerp, InputProbsFilename.c_str());
   cerr << "Model one initalization OK" << endl;
   amodel<PROB> aTable(false);
 
@@ -807,13 +816,15 @@ double StartTraining(int&result)
           Model3_Iterations == 0 && Model4_Iterations == 0 &&
           Model5_Iterations == 0 && dumpCount) { // OK we need to output!
         minIter=m1.em_with_tricks(Model1_Iterations, seedModel1,
-                                  *dictionary, useDict,true,
+                                  *dictionary, useDict, interpolateProbsFromFileM1,
+				  freqBasedInterpolation, multiplier, true,
                                   countPrefix.length() == 0 ? "./" : countPrefix.c_str(),
                                   dumpCountUsingWordString
                                  );
       } else {
         minIter=m1.em_with_tricks(Model1_Iterations, true,
-                                  *dictionary, useDict);
+                                  *dictionary, useDict, interpolateProbsFromFileM1,
+				  freqBasedInterpolation, multiplier);
       }
 
 
@@ -825,15 +836,17 @@ double StartTraining(int&result)
         if(HMM_Iterations == 0 &&
             Model3_Iterations == 0 && Model4_Iterations == 0 &&
             Model5_Iterations == 0 && dumpCount) {
-          minIter=m2.em_with_tricks(Model2_Iterations,true,
-                                    countPrefix.length() == 0 ? "./" : countPrefix.c_str(),
-                                    dumpCountUsingWordString);
+          minIter=m2.em_with_tricks(Model2_Iterations, interpolateProbsFromFileM2,
+			  freqBasedInterpolation, multiplier, true,
+			  countPrefix.length() == 0 ? "./" : countPrefix.c_str(),
+                          dumpCountUsingWordString);
         } else {
-          minIter=m2.em_with_tricks(Model2_Iterations);
+          minIter=m2.em_with_tricks(Model2_Iterations, interpolateProbsFromFileM2,
+			  freqBasedInterpolation, multiplier);
         }
         errors=m2.errorsAL();
       }
-      //cout << tTable.getProb(2, 2) << endl;
+      cout << tTable.getProb(2, 2) << endl;
 
 
       if (HMM_Iterations > 0 && (restart < 2 || restart == 4 || restart == 5 || restart == 6)) {
@@ -847,9 +860,12 @@ double StartTraining(int&result)
             Model5_Iterations == 0 && dumpCount) {
           minIter=h.em_with_tricks(HMM_Iterations,true,
                                    countPrefix.length() == 0 ? NULL : countPrefix.c_str(),
-                                   dumpCountUsingWordString, restart == 6);
+                                   dumpCountUsingWordString, restart == 6,
+				   interpolateProbsFromFileHmm, freqBasedInterpolation,
+				   multiplier);
         } else {
-          minIter=h.em_with_tricks(HMM_Iterations,false,NULL,false,restart==6);
+          minIter=h.em_with_tricks(HMM_Iterations,false,NULL,false,restart==6,
+			  interpolateProbsFromFileHmm, freqBasedInterpolation, multiplier);
         }
         //multi_thread_em(HMM_Iterations, NCPUS, &h);
         errors=h.errorsAL();
@@ -975,6 +991,18 @@ int main(int argc, char* argv[])
                              "target vocabulary classes file name",
                              TargetVocabClassesFilename,
                              PARLEV_INPUT));
+
+  getGlobalParSet().insert(new Parameter<string>(
+                             "I",
+                             ParameterChangedFlag,
+                             "input probs file name",
+                             InputProbsFilename,PARLEV_INPUT));
+  getGlobalParSet().insert(new Parameter<string>(
+                             "INPUT PROBS FILE",
+                             ParameterChangedFlag,
+                             "input probs file name",
+                             InputProbsFilename,-1));
+
   getGlobalParSet().insert(new Parameter<string>(
                              "C",
                              ParameterChangedFlag,
@@ -985,6 +1013,7 @@ int main(int argc, char* argv[])
                              ParameterChangedFlag,
                              "training corpus file name",
                              CorpusFilename,-1));
+
   getGlobalParSet().insert(new Parameter<string>("TC",
                            ParameterChangedFlag,
                            "test corpus file name",

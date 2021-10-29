@@ -37,16 +37,19 @@ model1::model1(
   vcbList& evcblist,
   vcbList& fvcblist,
   tmodel<COUNT, PROB> &_tTable,
+  // tmodel<COUNT, PROB> &_inputTTable,
   Perplexity & _perp,
   sentenceHandler& _sHandler1,
   Perplexity* _testPerp,
   sentenceHandler* _testHandler,
   Perplexity& _trainViterbiPerp,
-  Perplexity* _testViterbiPerp)
+  Perplexity* _testViterbiPerp,
+  const char* inprobsname)
   :
   report_info(_perp,_sHandler1,_testPerp,_testHandler,_trainViterbiPerp,_testViterbiPerp),
-  efFilename(efname), Elist(evcblist), Flist(fvcblist),
-  eTotalWCount(Elist.totalVocab()), fTotalWCount(Flist.totalVocab()),
+  efFilename(efname), inputProbsFilename(inprobsname), Elist(evcblist),
+  Flist(fvcblist), eTotalWCount(Elist.totalVocab()),
+  fTotalWCount(Flist.totalVocab()),
   noEnglishWords(Elist.size()), noFrenchWords(Flist.size()), tTable(_tTable),
   evlist(Elist.getVocabList()), fvlist(Flist.getVocabList())
 {}
@@ -61,8 +64,10 @@ model1::model1(const model1& m1, int _threadID) :
   noEnglishWords(m1.noEnglishWords),
   noFrenchWords(m1.noFrenchWords),
   tTable(m1.tTable),
+  // inputTTable(m1.inputTTable),
   evlist(m1.evlist),
-  fvlist(m1.fvlist)
+  fvlist(m1.fvlist),
+  inputProbsFilename(m1.inputProbsFilename)
 {}
 
 void model1::initialize_table_uniformly(sentenceHandler& sHandler1)
@@ -130,7 +135,8 @@ int model1::em_thread(int noIterations, int nthread, /*Perplexity& perp, sentenc
 int model1::em_with_tricks(int noIterations, /*Perplexity& perp, sentenceHandler& sHandler1, */
                            bool seedModel1, Dictionary& dictionary, bool useDict /*Perplexity* testPerp, sentenceHandler* testHandler,
 										     Perplexity& trainViterbiPerp, Perplexity* testViterbiPerp */
-                           , bool dumpCount ,  const char* dumpCountName, bool useString)  // If specified, then will dump files before last iteration
+                           , bool interpolateProbsFromFile, int freqBasedInterpolation, float multiplier, bool dumpCount,
+			   const char* dumpCountName, bool useString)  // If specified, then will dump files before last iteration
 {
   double minErrors=1.0;
   int minIter=0;
@@ -189,10 +195,10 @@ int model1::em_with_tricks(int noIterations, /*Perplexity& perp, sentenceHandler
       minErrors=errorsAL();
       minIter=it;
     }
-    //if (dump_files){
-    //    if( OutputInAachenFormat==1 )
-    //        tTable.printCountTable(tfile.c_str(),Elist.getVocabList(),Flist.getVocabList(),1);
-    //}
+    if (dump_files){
+        if( OutputInAachenFormat==1 )
+            tTable.printCountTable(tfile.c_str(),Elist.getVocabList(),Flist.getVocabList(),1);
+    }
     cerr << "Normalizing T " << endl;
 
     /**
@@ -205,7 +211,12 @@ int model1::em_with_tricks(int noIterations, /*Perplexity& perp, sentenceHandler
     }
 
     tTable.normalizeTable(Elist, Flist);
-    //cout << tTable.getProb(2,2) << endl;
+    if (interpolateProbsFromFile) {
+	    tTable.interpolateProbsFromFile(inputProbsFilename.c_str(), freqBasedInterpolation,
+			    multiplier);
+	    tTable.normalizeTableProbs(Elist, Flist);
+    }
+
     cerr << " DONE Normalizing " << endl;
     cout << modelName << ": ("<<it<<") TRAIN CROSS-ENTROPY " << perp.cross_entropy()
          << " PERPLEXITY " << perp.perplexity() << '\n';

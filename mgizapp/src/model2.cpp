@@ -55,8 +55,9 @@ void model2::initialize_table_uniformly(sentenceHandler& sHandler1)
   }
 }
 
-int model2::em_with_tricks(int noIterations,bool dumpCount,
-                           const char* dumpCountName, bool useString)
+int model2::em_with_tricks(int noIterations, bool interpolateProbsFromFile,
+		int freqBasedInterpolation, float multiplier, bool dumpCount,
+		const char* dumpCountName, bool useString)
 {
   double minErrors=1.0;
   int minIter=0;
@@ -100,6 +101,12 @@ int model2::em_with_tricks(int noIterations,bool dumpCount,
     }
     tTable.normalizeTable(Elist, Flist);
     aCountTable.normalize(aTable);
+    if (interpolateProbsFromFile) {
+	cerr << "Interpolating with probabilities from file - Model 2\n";
+	tTable.interpolateProbsFromFile(inputProbsFilename.c_str(), freqBasedInterpolation,
+			multiplier);
+	tTable.normalizeTableProbs(Elist, Flist);
+    }
     cout << modelName << ": ("<<it<<") TRAIN CROSS-ENTROPY " << perp.cross_entropy()
          << " PERPLEXITY " << perp.perplexity() << '\n';
     if (testPerp && testHandler)

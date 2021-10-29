@@ -77,7 +77,9 @@ public:
   hmm(model2&m2,WordClasses &e, WordClasses& f);
   void initialize_table_uniformly(sentenceHandler&);
   int em_with_tricks(int iterations, bool dumpCount = false,
-                     const char* dumpCountName = NULL, bool useString = false,bool resume=false);
+                     const char* dumpCountName = NULL, bool useString = false,bool resume=false,
+		     bool interpolateProbsFromFile = false, int freqBasedInterpolation = 0,
+		     float multiplier = 1.0);
   CTTableDiff<COUNT,PROB>* em_one_step(int it);
   // void em_one_step_2(int it,int part);
   void load_table(const char* aname);

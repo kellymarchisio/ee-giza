@@ -55,7 +55,7 @@ GLOBAL_PARAMETER(WordIndex, MAX_FERTILITY, "MAX_FERTILITY",
 using namespace std;
 string Prefix, LogFilename, OPath, Usage, SourceVocabFilename,
        TargetVocabFilename, CorpusFilename, TestCorpusFilename, t_Filename,
-       SourceVocabClassesFilename, TargetVocabClassesFilename,
+       SourceVocabClassesFilename, TargetVocabClassesFilename, InputProbsFilename,
        a_Filename, p0_Filename, d_Filename, n_Filename, dictionary_Filename;
 
 
@@ -80,7 +80,7 @@ int main(int argc, char* argv[])
 
   model1 m1(CorpusFilename.c_str(), eTrainVcbList, fTrainVcbList, tTable,
             trainPerp, *corpus, &testPerp, corpus, trainViterbiPerp,
-            &testViterbiPerp);
+            &testViterbiPerp, InputProbsFilename.c_str());
   amodel<float> aTable(false);
   amodel<float> aCountTable(false);
   model2 m2(m1, aTable, aCountTable);
