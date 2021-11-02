@@ -25,14 +25,13 @@ Manually download the En-De data. Instructions: https://github.com/lilt/alignmen
 Run `sh setup.sh`
 
 To build ee-giza++:
-
-
+```
 cd mgizapp
 mkdir build
 cd build
 cmake ..
 make
-
+```
 
 Usage
 --------
@@ -47,4 +46,5 @@ Then run EE-Giza++ with 1000 sentences:
 	sh run-eegiza.sh de en 1000 
 
 Results for eegiza++ will be found in exps/de-en/1000/results/deen-results.txt
+
 Results for vanilla giza++ will be found in exps/de-en/1000/results-vanilla/deen-results.txt
