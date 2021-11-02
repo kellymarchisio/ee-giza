@@ -15,3 +15,8 @@ eegizapp/src/cmake_install.cmake
 eegizapp/src/mkcls/CMakeFiles
 eegizapp/src/mkcls/Makefile
 eegizapp/src/mkcls/cmake_install.cmake
+
+data/
+exps/
+embs/
+third_party/

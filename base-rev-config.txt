@@ -1,0 +1,97 @@
+adbackoff 0
+compactadtable 1
+compactalignmentformat 0
+coocurrencefile exps/SRC-TRG/SIZE/corpus.SRC-TRG.TRG.SIZE_corpus.SRC-TRG.SRC.SIZE.cooc
+corpusfile exps/SRC-TRG/SIZE/corpus.SRC-TRG.TRG.SIZE_corpus.SRC-TRG.SRC.SIZE.snt
+countcutoff 1e-06
+countcutoffal 1e-05
+countincreasecutoff 1e-06
+countincreasecutoffal 1e-05
+countoutputprefix 
+d 
+deficientdistortionforemptyword 0
+depm4 76
+depm5 68
+dictionary 
+dopeggingyn 0
+dumpcount 0
+dumpcountusingwordstring 0
+emalignmentdependencies 2
+emalsmooth 0.2
+emprobforempty 0.4
+emsmoothhmm 2
+hmmdumpfrequency 0
+hmmiterations 0
+inputprobsfile exps/SRC-TRG/SIZE/prob-tables/low_freq_words_all.TRG.probs.ids
+interpolateprobsfromfilem1 1
+interpolateprobsfromfilem2 0
+interpolateprobsfromfilehmm 1
+interpolateprobsfromfilem3 0
+l user.log
+log 0
+logfile user.log
+manlexfactor1 0
+manlexfactor2 0
+manlexmaxmultiplicity 20
+maxfertility 10
+maxsentencelength 101
+mh 5 // HMM iterations.
+mincountincrease 1e-07
+ml 101
+model1dumpfrequency 5
+model1iterations 5
+model23smoothfactor 0
+model2dumpfrequency 0
+model2iterations 0
+model345dumpfrequency 0
+model3dumpfrequency 5
+model3iterations 5
+model4iterations 5
+model4smoothfactor 0.2
+model5iterations 0
+model5smoothfactor 0.1
+model6iterations 0
+nbestalignments 0
+ncpus 16
+nodumps 0
+nofiledumpsyn 0
+nsmooth 64
+nsmoothgeneral 0
+numberofiterationsforhmmalignmentmodel 5
+onlyaldumps 0
+outputfileprefix exps/SRC-TRG/SIZE/RESULTS_DIR/Backward/user
+outputpath 
+p 0
+p0 -1
+peggedcutoff 0.03
+pegging 0
+previousa 
+previousd 
+previousd4 
+previousd42 
+previoushmm 
+previousn 
+previousp0 
+previoust 
+probcutoff 1e-07
+probsmooth 1e-07
+readtableprefix 
+restart 0
+sourcevocabularyclasses exps/SRC-TRG/SIZE/corpus.SRC-TRG.TRG.SIZE.class
+sourcevocabularyfile exps/SRC-TRG/SIZE/corpus.SRC-TRG.TRG.SIZE.vcb
+t1 5
+t2 0
+t2to3 0
+t3 5
+t345 0
+targetvocabularyclasses exps/SRC-TRG/SIZE/corpus.SRC-TRG.SRC.SIZE.class
+targetvocabularyfile exps/SRC-TRG/SIZE/corpus.SRC-TRG.SRC.SIZE.vcb
+tc 
+testcorpusfile 
+th 5
+transferdumpfrequency 0
+v 0
+verbose 0
+verbosesentence -10
+freqBasedInterpolation 1
+multiplier 10000 
