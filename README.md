@@ -26,7 +26,7 @@ Run `sh setup.sh`
 
 To build ee-giza++:
 ```
-cd mgizapp
+cd eegizapp 
 mkdir build
 cd build
 cmake ..
