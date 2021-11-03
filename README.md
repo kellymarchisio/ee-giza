@@ -15,6 +15,7 @@ Requirements
 - cupy
 - scipy
 - pytorch
+- boost
 --------
 
 Setup
@@ -33,6 +34,7 @@ cmake ..
 make
 ```
 
+
 Usage
 --------
 
@@ -48,3 +50,19 @@ Then run EE-Giza++ with 1000 sentences:
 Results for eegiza++ will be found in exps/de-en/1000/results/deen-results.txt
 
 Results for vanilla giza++ will be found in exps/de-en/1000/results-vanilla/deen-results.txt
+
+
+Troubleshooting
+--------
+You'll need Boost to compile eegiza++. Here's what my env variables look like:
+
+```
+export LIBRARY_PATH="/PATH/TO/BOOST/boost_1_65_1/install/lib:$LIBRARY_PATH"
+export LD_LIBRARY_PATH="/PATH/TO/BOOST/boost_1_65_1/install/lib:$LD_LIBRARY_PATH"
+export INCLUDE_PATH="/PATH/TO/BOOST/boost_1_65_1/install/include:$INCLUDE_PATH"
+export CMAKE_LIBRARY_PATH="/PATH/TO/BOOST/boost_1_65_1/install/lib:$CMAKE_LIBRARY_PATH"
+export CMAKE_INCLUDE_PATH="/PATH/TO/BOOST/boost_1_65_1/install/include:$CMAKE_INCLUDE_PATH"
+export BOOST_ROOT="/PATH/TO/BOOST/boost_1_65_1/install"
+export BOOST_INCLUDE="/PATH/TO/BOOST/boost_1_65_1/install/include"
+export BOOST_LIBDIR="/PATH/TO/BOOST/boost_1_65_1/install/lib"
+```
