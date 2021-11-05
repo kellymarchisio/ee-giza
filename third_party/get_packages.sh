@@ -8,6 +8,8 @@ cat vecmap/cupy_utils.py >> vecmap/embeddings.py
 sed -i 's/from cupy_utils import */## from cupy_utils import */g' vecmap/embeddings.py
 mv vecmap vecmap_fork
 
+git clone https://github.com/moses-smt/mosesdecoder.git 
+
 git clone https://github.com/lilt/alignment-scripts.git
 cp ../scripts/combine-with-outdir.sh alignment-scripts/scripts/combine.sh
 mv alignment-scripts alignment-scripts-fork
